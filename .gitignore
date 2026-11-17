@@ -1,0 +1,7 @@
+# build output
+bin/
+obj/
+# preview renders and other scratch
+*.user
+.vs/
+__pycache__/

@@ -1,7 +1,7 @@
 {
   "Name": "Valley Exchange",
-  "Author": "Rachman Nurhakim",
-  "Version": "1.34.0",
+  "Author": "evant",
+  "Version": "1.34.2",
   "Description": "Stock market, oil wells and a hired crew for rich farmers: field and ranch hands, fisherman, crab catcher, miner, adventurer, chef, salesman, oil roughneck, harvester, forager, brewer, blacksmith, artisan, courier, banker, scientist, groundskeeper and a Guild Master with an endless dungeon.",
   "UniqueID": "evant.ValleyExchange",
   "EntryDll": "ValleyExchange.dll",

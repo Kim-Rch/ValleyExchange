@@ -534,8 +534,9 @@ public static class Market
     }
 
     /// <summary>
-    /// Today's order: first top up your pinned seeds to their targets, then (auto) the most profitable seed for the empty soil
-    /// the crate's seeds don't already cover. Stays inside the budget at the haggled prices.
+    /// Today's order: first top up your pinned seeds to their targets, then (auto) the empty soil the crate's seeds don't already
+    /// cover, counted in 3x3 patches of 9 seeds that take turns over her picks (the most profitable few). Stays inside the budget
+    /// at the haggled prices, best pick first.
     /// </summary>
     public static List<(string Id, int Count, int Each)> SeedOrder(IReadOnlyList<SeedOffer> offers, IReadOnlyDictionary<string, int> pinned,
         IReadOnlyDictionary<string, int> inCrate, int uncoveredSoil, bool auto, long budget, double discount)
@@ -555,10 +556,25 @@ public static class Market
             if (offers.FirstOrDefault(o => o.Id == id) is { } offer)
                 Buy(offer, target - inCrate.GetValueOrDefault(id));
         }
-        if (auto && uncoveredSoil > 0 && offers.Where(o => o.Profit > 0).MaxBy(o => o.Profit) is { } best)
-            Buy(best, uncoveredSoil);
+        if (auto && uncoveredSoil > 0)
+        {
+            var picks = SeedPicks(offers);
+            int patches = (uncoveredSoil + Patch - 1) / Patch;
+            for (int i = 0; i < picks.Count; i++)
+                Buy(picks[i], Patch * (patches / picks.Count + (i < patches % picks.Count ? 1 : 0)));
+        }
         return order;
     }
+
+    /// <summary>Seeds in one 3x3 patch: she buys, and the field hands plant, a patch at a time of one kind.</summary>
+    public const int Patch = 9;
+
+    /// <summary>How many kinds of seed she buys for the empty soil.</summary>
+    public const int SeedVariety = 3;
+
+    /// <summary>Her picks for the empty soil: the most profitable few seeds, best first.</summary>
+    public static List<SeedOffer> SeedPicks(IEnumerable<SeedOffer> offers) =>
+        offers.Where(o => o.Profit > 0).OrderByDescending(o => o.Profit).Take(SeedVariety).ToList();
 
     // ---- spreading land hands ----
 

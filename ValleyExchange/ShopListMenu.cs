@@ -17,7 +17,7 @@ internal sealed class ShopListMenu : IClickableMenu
 
     private readonly MarketState state;
     private readonly List<Market.SeedOffer> offers;
-    private readonly string? best;
+    private readonly HashSet<string> picks;
     private int scroll, mouseX, mouseY;
     private Rectangle autoRect;
 
@@ -25,7 +25,7 @@ internal sealed class ShopListMenu : IClickableMenu
     {
         this.state = state;
         this.offers = Shopkeeper.Offers().OrderBy(o => ItemRegistry.GetDataOrErrorItem(o.Id).DisplayName).ToList();
-        this.best = this.offers.Where(o => o.Profit > 0).MaxBy(o => o.Profit)?.Id;
+        this.picks = Market.SeedPicks(this.offers).Select(o => o.Id).ToHashSet();
         this.Layout();
         Game1.playSound("bigSelect");
     }
@@ -108,7 +108,7 @@ internal sealed class ShopListMenu : IClickableMenu
 
         this.autoRect = new Rectangle(left, top, 330, Button);
         this.DrawButton(b, this.autoRect, this.state.ShopAuto ? "Auto-fill empty soil: ON" : "Auto-fill empty soil: OFF");
-        Utility.drawTextWithShadow(b, $"Budget {this.state.ShopBudget:N0}g/day (ask her to change)   * = her pick for empty soil", font, new Vector2(left + 346, top + 6), Color.SaddleBrown);
+        Utility.drawTextWithShadow(b, $"Budget {this.state.ShopBudget:N0}g/day (ask her to change)   * = her picks for empty soil", font, new Vector2(left + 346, top + 6), Color.SaddleBrown);
         int columns = top + 46;
         Utility.drawTextWithShadow(b, "Seed", font, new Vector2(left + 44, columns), Color.SaddleBrown);
         Utility.drawTextWithShadow(b, "Price   Earns/tile   In crate", font, new Vector2(left + 330, columns), Color.SaddleBrown);
@@ -124,7 +124,7 @@ internal sealed class ShopListMenu : IClickableMenu
             if (i % 2 == 0)
                 b.Draw(Game1.staminaRect, new Rectangle(left, y, this.width - Pad * 2, Row - 2), Color.SaddleBrown * 0.06f);
             b.Draw(data.GetTexture(), new Vector2(left + 4, y + 6), data.GetSourceRect(), Color.White, 0f, Vector2.Zero, 2f, SpriteEffects.None, 1f);
-            Utility.drawTextWithShadow(b, (offer.Id == this.best ? "* " : "") + data.DisplayName, font, new Vector2(left + 44, y + 10), Game1.textColor);
+            Utility.drawTextWithShadow(b, (this.picks.Contains(offer.Id) ? "* " : "") + data.DisplayName, font, new Vector2(left + 44, y + 10), Game1.textColor);
             Utility.drawTextWithShadow(b, $"{offer.Price:N0}g", font, new Vector2(left + 330, y + 10), Game1.textColor);
             Utility.drawTextWithShadow(b, offer.Profit > 0 ? $"{offer.Profit:N0}g" : "too late", font, new Vector2(left + 420, y + 10), offer.Profit > 0 ? Up : Down);
             Utility.drawTextWithShadow(b, $"{Crate.Count(offer.Id):N0}", font, new Vector2(left + 560, y + 10), Game1.textColor);

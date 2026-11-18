@@ -304,8 +304,12 @@ Check(Market.SeasonProfit(80, 1, 20, 4, 0, 27) == (80 - 20) * 6 && Market.Season
 var offers = new List<Market.SeedOffer> { new("(O)472", 20, 360), new("(O)481", 80, 520), new("(O)479", 50, -1) };
 var order = Market.SeedOrder(offers, new Dictionary<string, int> { ["(O)472"] = 30 }, new Dictionary<string, int> { ["(O)472"] = 10 },
     uncoveredSoil: 100, auto: true, budget: 5_000, discount: 0.10);
-Check(order.Count == 2 && order[0] == ("(O)472", 20, 18) && order[1].Id == "(O)481" && order[1].Each == 72 && order[1].Count == (5_000 - 20 * 18) / 72,
-    "seed order: pinned top-up first, then the best crop for the empty soil, inside the budget");
+Check(order.Count == 3 && order[0] == ("(O)472", 20, 18) && order[1] == ("(O)481", 54, 72) && order[2] == ("(O)472", (5_000 - 360 - 54 * 72) / 18, 18),
+    "seed order: pinned top-up first, then the empty soil in 3x3 patches taking turns over her picks (best first), never a losing seed");
+var patchy = Market.SeedOrder(offers.Append(new("(O)490", 30, 100)).ToList(), new Dictionary<string, int>(), new Dictionary<string, int>(), 40, auto: true, budget: 100_000, discount: 0);
+Check(patchy.Select(o => o.Count).SequenceEqual(new[] { 18, 18, 9 }), "seed order: 40 empty tiles = 5 patches of 9: 2, 2 and 1 patches");
+var poor = Market.SeedOrder(offers, new Dictionary<string, int>(), new Dictionary<string, int>(), 101, auto: true, budget: 3_000, discount: 0);
+Check(poor.Count == 2 && poor[0] == ("(O)481", 37, 80) && poor[1] == ("(O)472", 2, 20), "seed order: a tight budget buys the best pick first");
 Check(Market.SeedOrder(offers, new Dictionary<string, int>(), new Dictionary<string, int>(), 100, auto: false, 5_000, 0).Count == 0
     && Market.SeedOrder(offers, new Dictionary<string, int>(), new Dictionary<string, int>(), 0, auto: true, 5_000, 0).Count == 0, "no list, no auto or no soil: no shopping");
 

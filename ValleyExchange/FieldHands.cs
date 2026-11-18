@@ -43,11 +43,20 @@ internal static class FieldHands
             .ToList();
     }
 
-    /// <summary>The seed growing next door (left, above, right, below), so a field keeps one crop in a block instead of a patchwork.</summary>
-    private static string? NeighborSeed(GameLocation location, Vector2 tile) =>
-        new[] { new Vector2(-1, 0), new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1) }
-            .Select(d => location.terrainFeatures.TryGetValue(tile + d, out var f) && f is HoeDirt { crop: { } crop } ? crop.netSeedIndex.Value : null)
-            .FirstOrDefault(id => id != null);
+    /// <summary>The seed already growing in this tile's 3x3 patch, so each patch is one crop; a fresh patch takes the biggest stack, so kinds take turns.</summary>
+    private static string? PatchSeed(GameLocation location, Vector2 tile)
+    {
+        int left = (int)tile.X / 3 * 3, top = (int)tile.Y / 3 * 3;
+        for (int y = top; y < top + 3; y++)
+        {
+            for (int x = left; x < left + 3; x++)
+            {
+                if (location.terrainFeatures.TryGetValue(new Vector2(x, y), out var f) && f is HoeDirt { crop: { } crop })
+                    return crop.netSeedIndex.Value;
+            }
+        }
+        return null;
+    }
 
     /// <summary>Sow one tile with the best fitting seed from the crate, for the planting fee. Returns whether it got planted.</summary>
     public static bool Sow(GameLocation location, Vector2 tile)
@@ -55,8 +64,8 @@ internal static class FieldHands
         int fee = CrewSkills.Wage(Role.Field, Jobs.Price(JobKind.Plant));
         if (Game1.player.Money < fee || !location.terrainFeatures.TryGetValue(tile, out var feature) || feature is not HoeDirt { crop: null } dirt)
             return false;
-        string? neighbor = NeighborSeed(location, tile);
-        foreach (string seed in SeedsFor(location).OrderBy(s => Bare(s) == neighbor ? 0 : 1)) // same as the neighbors first, then the biggest stack
+        string? patch = PatchSeed(location, tile);
+        foreach (string seed in SeedsFor(location).OrderBy(s => Bare(s) == patch ? 0 : 1)) // the patch's seed first, then the biggest stack
         {
             if (!dirt.canPlantThisSeedHere(Bare(seed)) || !Crate.Take(seed, 1))
                 continue;

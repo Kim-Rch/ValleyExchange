@@ -2,15 +2,16 @@
 
 A Stardew Valley SMAPI mod by Rachman Nurhakim.
 
-Version: 1.34.0
+Version: 2.0.0
 
 ## Features
 
-- A stock market for farmers.
-- Oil wells and refining.
-- A hired crew for farming, ranching, fishing, mining, crafting, deliveries, banking, research, and more.
-- A Guild Master with an endless dungeon.
+- A stock market for farmers: trade Valley companies from a terminal, with seasonal dividends and daily news.
+- A crude and gasoline price ticker on the trading screen.
 - Optional integration with ValleyTalk (`dandm1.ValleyTalk`).
+- Optional integration with Brawnies (`evant.Brawnies`): AI dialogue also knows about your crew and oil field.
+
+Since 2.0.0 the hired crew, the Guild Master's dungeon, the pirate fleet, research and the oil field live in the separate **Brawnies** mod. Brawnies takes the crew over from an existing Valley Exchange save on first load.
 
 ## Requirements
 
@@ -35,7 +36,7 @@ Build the project, then use its generated mod package. Place the `ValleyExchange
 ## Repository layout
 
 - `ValleyExchange/`: mod source and assets.
-- `MarketCheck/`: market-checking utility.
+- `MarketCheck/`: checks for the market rules.
 - `tools/`: sprite-generation scripts.
 
 The internal `evant.ValleyExchange` identifiers are retained for compatibility with existing saves. Build output and local development history are not included in this source snapshot.

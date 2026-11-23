@@ -18,7 +18,6 @@ internal sealed class StockMenu : IClickableMenu
     private readonly MarketState state;
     private readonly List<ClickableComponent> buy = new(), sell = new(), names = new(), qty = new();
     private ClickableTextureComponent upArrow = null!, downArrow = null!;
-    private ClickableComponent crew = null!;
     private int visibleRows, scroll, qtyIndex;
     private string status = "Click Buy or Sell. Prices change every morning.";
     private Color statusColor = Game1.textColor;
@@ -65,7 +64,6 @@ internal sealed class StockMenu : IClickableMenu
         int qy = this.FooterY() + 8;
         for (int i = 0; i < Quantities.Length; i++)
             this.qty.Add(new ClickableComponent(new Rectangle(left + 130 + i * 104, qy, 96, 42), "x" + Quantities[i].ToString("N0")));
-        this.crew = new ClickableComponent(new Rectangle(right - 220, qy, 220, 42), "Hired hands");
     }
 
     private int RowY(int row) => this.yPositionOnScreen + HeaderHeight + row * RowHeight;
@@ -124,12 +122,6 @@ internal sealed class StockMenu : IClickableMenu
             }
         }
 
-        if (this.crew.containsPoint(x, y))
-        {
-            Game1.playSound("bigSelect");
-            Game1.activeClickableMenu = new HireMenu(this.state) { exitFunction = this.exitFunction }; // same refresh as closing the terminal
-            return;
-        }
 
         int amount = Quantities[this.qtyIndex];
         for (int row = 0; row < this.visibleRows; row++)
@@ -241,7 +233,6 @@ internal sealed class StockMenu : IClickableMenu
         Text(b, "Quantity:", left, fy + 18);
         for (int i = 0; i < this.qty.Count; i++)
             Button(b, this.qty[i], this.qty[i].containsPoint(this.mouseX, this.mouseY), selected: i == this.qtyIndex);
-        Button(b, this.crew, this.crew.containsPoint(this.mouseX, this.mouseY));
 
         Text(b, this.status, left, fy + 62, this.statusColor);
 

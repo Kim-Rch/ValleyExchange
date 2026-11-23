@@ -12,5 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.4.0" />
+    <!-- SMAPI's own Newtonsoft: keeps the pre-split crew data in this save record untouched -->
+    <Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" Private="false" />
   </ItemGroup>
 </Project>
